@@ -17,6 +17,8 @@ void word_print(char *, int, int);
 
 int setup_buff(char *buff, char *user_str, int len){
 	int i = 0, j = 0;
+
+	// ignore whitespaces at beginning of user_str
 	while (*(user_str+j) == ' ' || *(user_str+j) == '\t') {
 		j++;
 	}
@@ -24,6 +26,7 @@ int setup_buff(char *buff, char *user_str, int len){
 	while (*(user_str+j) != '\0') {
 		if (i >= len) { return -1; }
 
+		// ignore duplicate whitespace
 		if (*(user_str+j) == ' ' || *(user_str+j) == '\t') {
 			buff[i] = ' ';
 			while (*(user_str+j) == ' ' || *(user_str+j) == '\t') { j++; }
@@ -35,6 +38,7 @@ int setup_buff(char *buff, char *user_str, int len){
 		i++;
 	}
 
+	// set last character to be overwritten with a . if it is whitespace
 	if (*(buff+i-1) == ' ') {
 		i--;
 	}
@@ -62,6 +66,7 @@ int count_words(char *buff, int len, int str_len) {
 
 	while (i < str_len) {
 		cnt++;
+		// increment i without counting words until we hit a space (end of word)
 		while (*(buff+i) != ' ' && i < str_len) { i++; } 
 		i++;
 	}
@@ -74,10 +79,12 @@ void reverse_string(char *buff, int len, int str_len) {
 
 	char* reverse_buff = malloc(len);
 
+	// copy buff backwards into reverse_buff
 	for (int i = 0; i < str_len; i++) {
 		*(reverse_buff+i) = *(buff+str_len-i-1);
 	}
 
+	// copy reverse_buff (forwards) into buff
 	for (int i = 0; i < str_len; i++) {
 		*(buff+i) = *(reverse_buff+i);
 	}
@@ -95,6 +102,8 @@ void word_print(char *buff, int len, int str_len) {
 		cnt++;
 		printf("%d. ", cnt);
 		letter_cnt = 0;
+
+		// print entire word until we hit a space (or the end of the string)
 		while (*(buff+i) != ' ' && i < str_len) { 
 			printf("%c", *(buff+i));
 			letter_cnt++;
@@ -114,10 +123,15 @@ void word_print(char *buff, int len, int str_len) {
 void word_replace(char *buff, char *original, char *new, int len, int str_len) {
 	if (str_len > len) { exit(3); }
 
+	// i represents the index of the start of the current word
+	// j represents the index *from* the start of the current word
+	// together they add into the index in the whole string
 	int i = 0, j = 0, match = 1;
 
 	while (j + i < str_len) {
 		while (j + i < str_len && *(buff+j+i) != ' ') {
+			// match is set to false (0) once a character in the current word
+			// no longer matches the respective character in original
 			if (*(buff+j+i) != *(original+j)) {
 				match = 0;
 			}
@@ -127,6 +141,9 @@ void word_replace(char *buff, char *original, char *new, int len, int str_len) {
 		if (match == 1) {
 			int k = i + j, l = 0;
 			char* rest_of_buff = malloc(len - k);
+
+			// copy everything past the end of the word to
+			// be replaced into rest_of_buff
 			while (k < len) {
 				*(rest_of_buff+l) = *(buff+k);
 				k++;
@@ -136,6 +153,7 @@ void word_replace(char *buff, char *original, char *new, int len, int str_len) {
 
 			k = i + j;
 			l = 0;
+			// copy new into buff starting from where original started
 			while (*(new+l) != '\0') {
 				*(buff+i) = *(new+l);
 				i++;
@@ -143,7 +161,11 @@ void word_replace(char *buff, char *original, char *new, int len, int str_len) {
 			}
 
 			l = 0;
+			// copy rest_of_buff into buff starting from where new ended
 			while (i < len) {
+				// we may exceed rest_of_buff_len if we replace a word with
+				// a shorter word; in this case, the rest of the buffer is
+				// filled with .s
 				if (l >= rest_of_buff_len) {
 					*(buff+i) = '.';
 				} else {

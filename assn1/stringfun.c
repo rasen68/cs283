@@ -16,7 +16,7 @@ void reverse_string(char *, int, int);
 void word_print(char *, int, int);
 
 int setup_buff(char *buff, char *user_str, int len){
-	int i, j = 0;
+	int i = 0, j = 0;
 	while (*(user_str+j) == ' ' || *(user_str+j) == '\t') {
 		j++;
 	}
@@ -60,10 +60,6 @@ int count_words(char *buff, int len, int str_len) {
 
 	int i = 0, cnt = 0;
 
-	if (*buff == ' ') {
-		i++;
-	}
-
 	while (i < str_len) {
 		cnt++;
 		while (*(buff+i) != ' ' && i < str_len) { i++; } 
@@ -94,9 +90,7 @@ void word_print(char *buff, int len, int str_len) {
 	printf("----------\n");
 
 	int i = 0, cnt = 0, letter_cnt = 0;
-	if (*buff == ' ') {
-		i++;
-	}
+
 	while (i < str_len) {
 		cnt++;
 		printf("%d. ", cnt);
@@ -116,6 +110,60 @@ void word_print(char *buff, int len, int str_len) {
 
 	printf("\nNumber of words returned: %d\n", cnt);
 }	
+
+void word_replace(char *buff, char *original, char *new, int len, int str_len) {
+	if (str_len > len) { exit(3); }
+
+	int i = 0, j = 0, match = 1;
+
+	while (j + i < str_len) {
+		while (j + i < str_len && *(buff+j+i) != ' ') {
+			if (*(buff+j+i) != *(original+j)) {
+				match = 0;
+			}
+			j++;
+		}
+
+		if (match == 1) {
+			int k = i + j, l = 0;
+			char* rest_of_buff = malloc(len - k);
+			while (k < len) {
+				*(rest_of_buff+l) = *(buff+k);
+				k++;
+				l++;
+			}
+			int rest_of_buff_len = l;
+
+			k = i + j;
+			l = 0;
+			while (*(new+l) != '\0') {
+				*(buff+i) = *(new+l);
+				i++;
+				l++;
+			}
+
+			l = 0;
+			while (i < len) {
+				if (l >= rest_of_buff_len) {
+					*(buff+i) = '.';
+				} else {
+					*(buff+i) = *(rest_of_buff+l);
+				}
+				i++;
+				l++;
+			}
+
+			free(rest_of_buff);
+			return;
+		}
+		
+		i += j + 1;
+		j = 0;
+		match = 1;
+	}
+	
+	exit(1);
+}
 
 int main(int argc, char *argv[]){
 
@@ -184,11 +232,12 @@ int main(int argc, char *argv[]){
     			print_buff(buff,BUFFER_SZ);
 				break;
 			case 'x':
-				printf("Not Implemented!\n");
     			if (argc < 5){
         			usage(argv[0]);
         			exit(1);
 				}
+				word_replace(buff, argv[3], argv[4], BUFFER_SZ, user_str_len);
+    			print_buff(buff,BUFFER_SZ);
 				break;
         default:
             usage(argv[0]);

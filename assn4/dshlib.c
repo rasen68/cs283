@@ -147,14 +147,16 @@ int exec_cmd(cmd_buff_t *cmd) {
 			int rc = execvp(arglist[0], arglist);
 			if (rc < 0) {
 				printf(ERR_EXEC);
-				return ERR_EXEC_CMD;
+				exit(42);
 			}
 		} else {
 			wait(&c_result);
+			if (WEXITSTATUS(c_result) != 0) {
+				return ERR_EXEC_CMD;
+			}
 			return OK;
 		}
 	}
-	return ERR_EXEC_CMD; // shouldnt ever get here
 }
 	
 int build_cmd_buff(char *cmd_line, cmd_buff_t *cmd_buff) {
